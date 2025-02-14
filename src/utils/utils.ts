@@ -9,7 +9,8 @@ export const BITCOIN_NETWORK = bitcoin.networks.testnet;
 export const BITCOIN_NETWORK_MAINNET = bitcoin.networks.bitcoin;
 // export const bitCoinRootUrl =
 // 'https://btc.getblock.io/74b59459-3846-4ebf-b09d-08552e2fe42e/testnet/';
-import * as BN from 'bn.js';
+import BN from 'bn.js';
+
 import { DepositBankDetail } from 'src/schema/DepositBankDetail/deposit-bank-detail.schema';
 
 export const bitCoinRootUrl = 'https://api.blockcypher.com/v1/btc/test3';
