@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Banner, BannerSchema } from 'src/schema/banner/banner.schema';
-import { Currency, CurrencySchema } from 'src/schema/Currency/currency.schema';
-import { NFT, NFTSchema } from 'src/schema/Nft/nft.schema';
-import { Otp, OtpSchema } from 'src/schema/OTP/otp.schema';
+import {
+  Currency,
+  CurrencySchema,
+} from '../../schema/Currency/currency.schema';
+
 import { User, UserSchema } from 'src/schema/User/user.schema';
+import { Banner, BannerSchema } from '../../schema/banner/banner.schema';
+import { NFT, NFTSchema } from '../../schema/Nft/nft.schema';
+import { Otp, OtpSchema } from '../../schema/OTP/otp.schema';
 import { NftModule } from '../nft/nft.module';
 import { UtilsService } from '../utils/utils.service';
 import { WalletModule } from '../wallet/wallet.module';
