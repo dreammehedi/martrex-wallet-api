@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { OTPTYPEENUM } from 'src/enum/otp.enum';
-import { generateStringId } from 'src/utils/utils';
+import { generateStringId } from '../../utils/utils';
 
 export type OtpDocument = HydratedDocument<Otp>;
 

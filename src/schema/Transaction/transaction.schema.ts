@@ -4,9 +4,9 @@ import {
   TRANSACTIONENUM,
   TRANSACTIONSTATUSENUM,
 } from 'src/enum/transaction.enum';
-import { generateStringId } from 'src/utils/utils';
-import { Currency } from '../Currency/currency.schema';
+import { generateStringId } from '../../utils/utils';
 import { Coin } from '../Coin/coin.schema';
+import { Currency } from '../Currency/currency.schema';
 
 export type TransactionDocument = HydratedDocument<Transaction>;
 

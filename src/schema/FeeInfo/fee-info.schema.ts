@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { generateStringId } from 'src/utils/utils';
+import { generateStringId } from '../../utils/utils';
 
 export type FeeInfoDocument = HydratedDocument<FeeInfo>;
 

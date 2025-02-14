@@ -6,10 +6,10 @@ import {
   CurrencySchema,
 } from '../../schema/Currency/currency.schema';
 
-import { User, UserSchema } from 'src/schema/User/user.schema';
 import { Banner, BannerSchema } from '../../schema/banner/banner.schema';
 import { NFT, NFTSchema } from '../../schema/Nft/nft.schema';
 import { Otp, OtpSchema } from '../../schema/OTP/otp.schema';
+import { User, UserSchema } from '../../schema/User/user.schema';
 import { NftModule } from '../nft/nft.module';
 import { UtilsService } from '../utils/utils.service';
 import { WalletModule } from '../wallet/wallet.module';

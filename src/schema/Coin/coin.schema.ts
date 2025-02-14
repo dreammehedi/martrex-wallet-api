@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { generateStringId } from 'src/utils/utils';
-import { Network } from '../Network/network.schema';
 import { HydratedDocument } from 'mongoose';
+import { generateStringId } from '../../utils/utils';
+import { Network } from '../Network/network.schema';
 
 export type CoinDocument = HydratedDocument<Coin>;
 
@@ -74,7 +74,11 @@ export class Coin {
   @Prop({ type: String, default: '' })
   onRampNetworkId: string;
 
-  @Prop({ type: String, default: '', enum: ['COINGECKO', 'COINGECKO_TERMINAL'] })
+  @Prop({
+    type: String,
+    default: '',
+    enum: ['COINGECKO', 'COINGECKO_TERMINAL'],
+  })
   priceFrom: string;
 }
 

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { NETWORKTYPEENUM } from 'src/enum/network.enum';
-import { generateStringId } from 'src/utils/utils';
+import { generateStringId } from '../../utils/utils';
 
 export type NetworkDocument = HydratedDocument<Network>;
 

@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-import { User } from '../User/user.schema';
+import { HydratedDocument } from 'mongoose';
+import { generateStringId } from '../../utils/utils';
 import { Coin } from '../Coin/coin.schema';
 import { Network } from '../Network/network.schema';
-import { HydratedDocument } from 'mongoose';
+import { User } from '../User/user.schema';
 import { Wallet } from '../Wallet/wallet.schema';
-import { generateStringId } from 'src/utils/utils';
 
 export type BalanceDocument = HydratedDocument<Balance>;
 
