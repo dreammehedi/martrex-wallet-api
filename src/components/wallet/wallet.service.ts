@@ -35,60 +35,75 @@ import {
   web3,
 } from 'src/utils/utils';
 
-import * as CryptoJS from 'crypto-js';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from 'src/schema/User/user.schema';
-import { Network, NetworkDocument } from 'src/schema/Network/network.schema';
-import { Web3 } from 'web3';
+import axios from 'axios';
 import * as bitcoin from 'bitcoinjs-lib';
-import { Coin, CoinDocument } from 'src/schema/Coin/coin.schema';
-import { Balance, BalanceDocument } from 'src/schema/Balance/balance.schema';
+import * as CryptoJS from 'crypto-js';
+import { Model } from 'mongoose';
 import Moralis from 'moralis';
-import {
-  Transaction,
-  TransactionDocument,
-} from 'src/schema/Transaction/transaction.schema';
+import { BuyCryptoPaymentMethodDTO } from 'src/enum/buy-crypto-payment-method.enum';
+import { NETWORKTYPEENUM } from 'src/enum/network.enum';
 import {
   TRANSACTIONENUM,
   TRANSACTIONSTATUSENUM,
 } from 'src/enum/transaction.enum';
-import { TransactionDTO, UpdateTransactionDTO } from './dto/transaction.dto';
-import { NETWORKTYPEENUM } from 'src/enum/network.enum';
-import { SwapDTO, WithdrawDTO, WithdrawFiatDTO } from './dto/withdraw.dto';
-import { Cron } from '@nestjs/schedule';
-const cron = require('node-cron');
-const TronWeb = require('tronweb');
-import axios from 'axios';
-import { UtilsService } from '../utils/utils.service';
+import { Balance, BalanceDocument } from 'src/schema/Balance/balance.schema';
+import { Coin, CoinDocument } from 'src/schema/Coin/coin.schema';
 import {
   CoinPrice,
   CoinPriceDocument,
 } from 'src/schema/CoinPrice/coin-price.schema';
-import { SetFeeDTO } from './dto/setFee.dto';
-import { FeeInfo, FeeInfoDocument } from 'src/schema/FeeInfo/fee-info.schema';
 import {
   Currency,
   CurrencyDocument,
 } from 'src/schema/Currency/currency.schema';
-import { NftType, SendNftDTO } from './dto/send-nft.dto';
+import {
+  DepositBankDetail,
+  DepositBankDetailDocument,
+} from 'src/schema/DepositBankDetail/deposit-bank-detail.schema';
+import {
+  DonationOrganization,
+  DonationOrganizationDocument,
+} from 'src/schema/DonationOrganization/donation-organization.schema';
+import { FeeInfo, FeeInfoDocument } from 'src/schema/FeeInfo/fee-info.schema';
+import {
+  FiatBalance,
+  FiatBalanceDocument,
+} from 'src/schema/FiatBalance/fiat-balance.schema';
+import { Network, NetworkDocument } from 'src/schema/Network/network.schema';
 import { NFT, NFTDocument } from 'src/schema/Nft/nft.schema';
+import {
+  StakingInfo,
+  StakingInfoDocument,
+} from 'src/schema/StakingInfo/staking-info.schema';
+import {
+  StakingPlan,
+  StakingPlanDocument,
+} from 'src/schema/StakingPlan/staking-plan.schema';
+import {
+  Transaction,
+  TransactionDocument,
+} from 'src/schema/Transaction/transaction.schema';
+import { User, UserDocument } from 'src/schema/User/user.schema';
+import {
+  UserStakeInfo,
+  UserStakeInfoDocument,
+} from 'src/schema/UserStakeInfo/user-stake-info.schema';
+import { Web3 } from 'web3';
 import { CoinsService } from '../coins/coins.service';
-import { StakeDTO } from './dto/stake.dto';
-import { UserStakeInfo, UserStakeInfoDocument } from 'src/schema/UserStakeInfo/user-stake-info.schema';
-import { StakingPlan, StakingPlanDocument } from 'src/schema/StakingPlan/staking-plan.schema';
-import { StakeService } from '../stake/stake.service';
-import { InvestAmountDTO } from '../stake/dto/invest-amount.dto';
-import { StakingInfo, StakingInfoDocument } from 'src/schema/StakingInfo/staking-info.schema';
-import { WithdrawRewardDTO } from './dto/withdrawReward.dto';
-import { FiatBalance, FiatBalanceDocument } from 'src/schema/FiatBalance/fiat-balance.schema';
-import { DonationOrganization, DonationOrganizationDocument } from 'src/schema/DonationOrganization/donation-organization.schema';
+import { UtilsService } from '../utils/utils.service';
 import { AddDonationOrganizationDTO } from './dto/add-donation-organization.dto';
-import { UpdateDonationOrganizationDTO } from './dto/update-donation-organization.dto';
-import { DepositBankDetail, DepositBankDetailDocument } from 'src/schema/DepositBankDetail/deposit-bank-detail.schema';
-import { DepositBankDTO } from './dto/deposit-bank.dto';
 import { BuyCryptoDTO } from './dto/buy-crypto.dto';
-import { BuyCryptoPaymentMethodDTO } from 'src/enum/buy-crypto-payment-method.enum';
+import { DepositBankDTO } from './dto/deposit-bank.dto';
+import { NftType, SendNftDTO } from './dto/send-nft.dto';
+import { SetFeeDTO } from './dto/setFee.dto';
+import { StakeDTO } from './dto/stake.dto';
+import { TransactionDTO, UpdateTransactionDTO } from './dto/transaction.dto';
+import { UpdateDonationOrganizationDTO } from './dto/update-donation-organization.dto';
+import { SwapDTO, WithdrawDTO, WithdrawFiatDTO } from './dto/withdraw.dto';
+import { WithdrawRewardDTO } from './dto/withdrawReward.dto';
+const cron = require('node-cron');
+const TronWeb = require('tronweb');
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
 const MIN_BALANCE_FOR_TRANSACTION = 10000000000000000;
@@ -119,8 +134,10 @@ export class WalletService {
     private _stakingInfoModel: Model<StakingInfoDocument>,
     @InjectModel(FiatBalance.name)
     private _fiatBalanceModel: Model<FiatBalanceDocument>,
-    @InjectModel(DonationOrganization.name) private _donationOrganizationModel: Model<DonationOrganizationDocument>,
-    @InjectModel(DepositBankDetail.name) private _depositBankDetailModel: Model<DepositBankDetailDocument>,
+    @InjectModel(DonationOrganization.name)
+    private _donationOrganizationModel: Model<DonationOrganizationDocument>,
+    @InjectModel(DepositBankDetail.name)
+    private _depositBankDetailModel: Model<DepositBankDetailDocument>,
     private coinService: CoinsService,
     private utilsService: UtilsService,
   ) {
@@ -161,21 +178,28 @@ export class WalletService {
         currency: 'usd',
       });
       if (!depositBankData) {
-        await this._depositBankDetailModel.updateOne({
-          _id: depositBank?._id,
-        }, depositBank, { upsert: true })
+        await this._depositBankDetailModel.updateOne(
+          {
+            _id: depositBank?._id,
+          },
+          depositBank,
+          { upsert: true },
+        );
       }
 
       const depositBankNgnData = await this._depositBankDetailModel.findOne({
         currency: 'ngn',
       });
       if (!depositBankNgnData) {
-        await this._depositBankDetailModel.updateOne({
-          _id: depositBankNgn?._id,
-        }, depositBankNgn, { upsert: true })
+        await this._depositBankDetailModel.updateOne(
+          {
+            _id: depositBankNgn?._id,
+          },
+          depositBankNgn,
+          { upsert: true },
+        );
       }
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
     }
   }
@@ -204,7 +228,8 @@ export class WalletService {
         isActive: true,
       });
 
-      const fiatBalanceBatch = this._fiatBalanceModel.collection.initializeUnorderedBulkOp();
+      const fiatBalanceBatch =
+        this._fiatBalanceModel.collection.initializeUnorderedBulkOp();
 
       currencies.forEach((currency) => {
         fiatBalanceBatch
@@ -227,10 +252,9 @@ export class WalletService {
           });
       });
 
-      await fiatBalanceBatch.execute().catch((err) => { });
+      await fiatBalanceBatch.execute().catch((err) => {});
     } catch (error) {
       console.log(error);
-
     }
   }
 
@@ -247,10 +271,12 @@ export class WalletService {
         this._coinModel
           .find()
           .then((coins) => JSON.parse(JSON.stringify(coins))),
-        this._currencyModel.find({
-          isDeleted: false,
-          isActive: true,
-        }).then((currencies) => JSON.parse(JSON.stringify(currencies))),
+        this._currencyModel
+          .find({
+            isDeleted: false,
+            isActive: true,
+          })
+          .then((currencies) => JSON.parse(JSON.stringify(currencies))),
       ]);
 
       for await (const coin of coins) {
@@ -293,7 +319,8 @@ export class WalletService {
           .catch((err) => console.log(err));
       }
 
-      const fiatBalanceBatch = this._fiatBalanceModel.collection.initializeUnorderedBulkOp();
+      const fiatBalanceBatch =
+        this._fiatBalanceModel.collection.initializeUnorderedBulkOp();
 
       currencies.forEach((currency) => {
         fiatBalanceBatch
@@ -316,8 +343,7 @@ export class WalletService {
           });
       });
 
-      await fiatBalanceBatch.execute().catch((err) => { });
-
+      await fiatBalanceBatch.execute().catch((err) => {});
     } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
@@ -461,11 +487,7 @@ export class WalletService {
 
   async getFiatBalance(user) {
     try {
-
-
-
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err.message);
     }
@@ -507,7 +529,7 @@ export class WalletService {
             from: 'coinprices',
             let: {
               coinId: '$coinId',
-              currencyId: userDocument.currencyId
+              currencyId: userDocument.currencyId,
             },
             pipeline: [
               {
@@ -522,7 +544,6 @@ export class WalletService {
               },
             ],
             as: 'coinPrice',
-
           },
         },
         {
@@ -628,7 +649,11 @@ export class WalletService {
             userId: userId,
             walletId: walletDocument.id,
             // balance>0 OR currencyId:usdCurrency?.id
-            $or: [{ balance: { $gt: 0 } }, { currencyId: usdCurrency?.id }, { currencyId: localCurrency?.id }],
+            $or: [
+              { balance: { $gt: 0 } },
+              { currencyId: usdCurrency?.id },
+              { currencyId: localCurrency?.id },
+            ],
           },
         },
         {
@@ -917,13 +942,13 @@ export class WalletService {
       const feeInfo = await this._feeInfoModel.findOne({
         feeName: 'swap_fee',
       });
-      debugger
+      debugger;
       swapFee = swapDto.amount * (feeInfo.feePercentage / 100);
-      debugger
+      debugger;
       swapDto.amount = swapDto.amount - swapFee;
-      debugger
+      debugger;
       const swappedAmount = swapDto.amount * coinPrice.price;
-      debugger
+      debugger;
 
       console.log('swappedAmount', swappedAmount);
       console.log('swapFee', swapFee);
@@ -934,8 +959,7 @@ export class WalletService {
         swapFee: swapFee,
         coinPrice: coinPrice.price,
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -947,7 +971,7 @@ export class WalletService {
       const walletDocument = await this._walletModel.findOne({
         userId: userId,
       });
-      debugger
+      debugger;
       const currency = await this._currencyModel.findOne({
         _id: swapDTO?.currencyId,
       });
@@ -960,9 +984,9 @@ export class WalletService {
       const networkDocument = await this._networkModel.findOne({
         _id: swapDTO?.networkId,
       });
-      debugger
+      debugger;
       if (!networkDocument) {
-        throw new Error("Network not found")
+        throw new Error('Network not found');
       }
       const balanceDocument = await this._balanceModel.findOne({
         userId: userId,
@@ -1016,19 +1040,19 @@ export class WalletService {
       const feeInfo = await this._feeInfoModel.findOne({
         feeName: 'swap_fee',
       });
-      debugger
+      debugger;
       swapFee = swapDTO.amount * (feeInfo.feePercentage / 100);
       swapDTO.amount = swapDTO.amount - swapFee;
       // updateBalance
-      debugger
+      debugger;
       await balanceDocument.updateOne({
         $inc: {
-          balance: -swapDTO.amount
-        }
+          balance: -swapDTO.amount,
+        },
       });
 
       const swappedAmount = swapDTO.amount * coinDocument.price;
-      debugger
+      debugger;
       const fiatBalance = await this._fiatBalanceModel.findOne({
         userId: userId,
         walletId: walletDocument.id,
@@ -1037,10 +1061,10 @@ export class WalletService {
 
       await fiatBalance.updateOne({
         $inc: {
-          balance: swappedAmount
-        }
+          balance: swappedAmount,
+        },
       });
-      debugger
+      debugger;
       const transactionDocument = await new this._transactionModel({
         userId: userId,
         walletId: walletDocument.id,
@@ -1433,7 +1457,7 @@ export class WalletService {
 
           if (!coinDocument?.isToken) {
             const estimatedGasFeeTrx = TRX_GAS_FEE;
-            debugger
+            debugger;
             if (amount + estimatedGasFeeTrx > balanceDocumentNative.balance) {
               throw new Error(
                 'Insufficient Balance for Fee Please Leave Adequate balance for blockchain transaction fee.',
@@ -1442,9 +1466,15 @@ export class WalletService {
 
             const amountInSun = tronWeb.toSun(amount);
 
+            // Ensure amountInSun is a number
+            const amountInSunNumber =
+              typeof amountInSun === 'string'
+                ? parseFloat(amountInSun)
+                : amountInSun.toNumber();
+
             const tx = await tronWeb.transactionBuilder.sendTrx(
               receiverAddress,
-              amountInSun,
+              amountInSunNumber, // Pass a valid number
               fromAddress,
             );
 
@@ -1525,7 +1555,7 @@ export class WalletService {
             };
           } else {
             const amountInDecimal = toDecimals(amount, coinDocument?.decimal);
-            debugger
+            debugger;
             const tronWebLocal = new TronWeb({
               fullNode: TRON_RPC,
               solidityNode: TRON_RPC,
@@ -1765,9 +1795,9 @@ export class WalletService {
         }
 
         const fee = await getBitcoinFeeData(networkDocument?.rpcUrl);
-        debugger
+        debugger;
         const highestFee = fee?.medium_fee_per_kb / 1000;
-        debugger
+        debugger;
         //  const rawTransaction = new bitcoin.Psbt({ network: BITCOIN_NETWORK });
         const tx = new bitcoin.TransactionBuilder(BITCOIN_NETWORK);
 
@@ -1776,41 +1806,41 @@ export class WalletService {
         let balance_utxo = 0;
         let i = 0;
 
-        const transaction = tx.buildIncomplete()
+        const transaction = tx.buildIncomplete();
         const size = transaction?.virtualSize();
 
-        const trxFee = Math.floor((size * 1.2) * highestFee);
+        const trxFee = Math.floor(size * 1.2 * highestFee);
 
         while (balance_utxo < amountInSatoshi + trxFee) {
           if (i >= trxs.length) {
             throw new Error('Insufficient balance');
           }
           if (trxs[i].tx_output_n >= 0) {
-            debugger
+            debugger;
             tx.addInput(trxs[i].tx_hash, trxs[i].tx_output_n);
-            debugger
+            debugger;
             balance_utxo += trxs[i].value;
           }
-          debugger
+          debugger;
           i++;
-
         }
-
 
         try {
           tx.addOutput(receiverAddress, amountInSatoshi);
-          debugger
-          const transaction = tx.buildIncomplete()
+          debugger;
+          const transaction = tx.buildIncomplete();
           const size = transaction?.virtualSize();
-          debugger
-          const trxFee = Math.floor((size * 2) * highestFee);
-          debugger
+          debugger;
+          const trxFee = Math.floor(size * 2 * highestFee);
+          debugger;
           if (fee > BTC_MAX_GAS_FEE) {
-            throw new Error("Transaction fee is higher than normal. Please wait for few minutes before trying it again.");
+            throw new Error(
+              'Transaction fee is higher than normal. Please wait for few minutes before trying it again.',
+            );
           }
-          debugger
+          debugger;
           const change = balance_utxo - amountInSatoshi - trxFee;
-          debugger
+          debugger;
           if (change > 546) {
             tx.addOutput(fromAddress, change);
           }
@@ -1827,22 +1857,22 @@ export class WalletService {
         // });
 
         let txn_no = i;
-        debugger
+        debugger;
         const privateKey = ECPair.fromWIF(fromKey, BITCOIN_NETWORK_MAINNET);
-        debugger
+        debugger;
         while (txn_no > 0) {
           tx.sign(txn_no - 1, privateKey);
           txn_no--;
         }
-        debugger
+        debugger;
         tx.maximumFeeRate = 2500;
 
         const tx_hex = tx.build().toHex();
-        debugger
+        debugger;
         // const feeInBtc = (trxs.length * 148 + 1 * 34 + 10) * highestFee;
-        const feeInBtc = (trxs.length * highestFee);
+        const feeInBtc = trxs.length * highestFee;
 
-        debugger
+        debugger;
         debugger;
 
         const txHash = await axios.post(
@@ -2054,8 +2084,6 @@ export class WalletService {
         if (fromKey.slice(0, 2) === '0x') fromKey = fromKey.slice(2);
 
         if (!coinDocument?.isToken) {
-          const amountInSun = tronWeb.toSun(amount);
-
           // const data = tronWeb.transactionBuilder.triggerSmartContract(
           //   contractAddress,
           //   'transfer(address,uint256)',
@@ -2074,9 +2102,17 @@ export class WalletService {
           // // Calculate the estimated gas fee in TRX
           // const estimatedGasFee = tronWeb.fromSun(estimatedEnergy * energyToTrxRate);
 
+          const amountInSun = tronWeb.toSun(amount);
+
+          // Convert amountInSun to a number
+          const amountInSunNumber =
+            typeof amountInSun === 'string'
+              ? parseFloat(amountInSun)
+              : amountInSun.toNumber();
+
           const tx = await tronWeb.transactionBuilder.sendTrx(
             receiverAddress,
-            amountInSun,
+            amountInSunNumber, // Ensure it's a number
             fromAddress,
           );
 
@@ -2362,7 +2398,7 @@ export class WalletService {
                 $lookup: {
                   from: 'networks',
                   let: {
-                    networkId: '$networkId'
+                    networkId: '$networkId',
                   },
                   pipeline: [
                     {
@@ -2536,7 +2572,7 @@ export class WalletService {
                   $expr: {
                     $eq: ['$_id', '$$coinId'],
                   },
-                }
+                },
               },
               {
                 $lookup: {
@@ -2608,7 +2644,7 @@ export class WalletService {
         {
           $addFields: {
             id: '$_id',
-          }
+          },
         },
         {
           $project: {
@@ -2659,7 +2695,10 @@ export class WalletService {
       });
 
       if (transactionDocument?.type === TRANSACTIONENUM.BUY) {
-        return await this.updateStatusOfBuyCryptoTransaction(updateTransactionDTO?.transactionId, updateTransactionDTO?.status as any);
+        return await this.updateStatusOfBuyCryptoTransaction(
+          updateTransactionDTO?.transactionId,
+          updateTransactionDTO?.status as any,
+        );
       }
 
       if (transactionDocument.type != TRANSACTIONENUM.WITHDRAW_FIAT) {
@@ -2783,7 +2822,7 @@ export class WalletService {
         await Moralis.start({
           apiKey: process.env.MORALIS_API_KEY,
         });
-      } catch (err) { }
+      } catch (err) {}
 
       return 'OK';
     } catch (err) {
@@ -2928,7 +2967,7 @@ export class WalletService {
                 for await (const transactionToken of tokenTransactions) {
                   if (
                     transactionToken?.contract?.toLowerCase() ==
-                    transaction?.toAddress?.toLowerCase() &&
+                      transaction?.toAddress?.toLowerCase() &&
                     hash == transactionToken?.transactionHash?.toLowerCase() &&
                     fromAddress == transactionToken?.from?.toLowerCase()
                   ) {
@@ -3131,7 +3170,7 @@ export class WalletService {
         console.log('inner end', i);
         return balanceObj;
       }
-      debugger
+      debugger;
     } catch (err) {
       console.log(err);
     }
@@ -3221,7 +3260,7 @@ export class WalletService {
 
               const resultTRC20 = await axios.get(
                 TRON_RPC +
-                `/v1/accounts/${walletAddress}/transactions/trc20?limit=100&contract_address=${coinItem.contractAddress}`,
+                  `/v1/accounts/${walletAddress}/transactions/trc20?limit=100&contract_address=${coinItem.contractAddress}`,
                 configTronGrid,
               );
               if (
@@ -3279,7 +3318,7 @@ export class WalletService {
               };
               const resultNative = await axios.get(
                 TRON_SCAN_URL +
-                `/api/transaction?sort=-timestamp&count=true&limit=20&start=0&address=${walletAddress}`,
+                  `/api/transaction?sort=-timestamp&count=true&limit=20&start=0&address=${walletAddress}`,
                 configTronScan,
               );
               if (
@@ -3505,16 +3544,17 @@ export class WalletService {
     }
   }
 
-  async getMytsionQuote(
-    buyCryptoDto: BuyCryptoDTO,
-  ) {
+  async getMytsionQuote(buyCryptoDto: BuyCryptoDTO) {
     try {
       console.log('buyCryptoDto', buyCryptoDto);
       let fromCoin = null;
       let fromCurrency = null;
       buyCryptoDto.paymentMethod = buyCryptoDto?.paymentMethod?.toUpperCase();
 
-      if (buyCryptoDto?.paymentMethod?.toUpperCase() === BuyCryptoPaymentMethodDTO.BANK_TRANSFER) {
+      if (
+        buyCryptoDto?.paymentMethod?.toUpperCase() ===
+        BuyCryptoPaymentMethodDTO.BANK_TRANSFER
+      ) {
         fromCoin = await this._coinModel.findOne({
           coinNameId: 'tether',
         });
@@ -3528,7 +3568,7 @@ export class WalletService {
         fromCurrency = await this._currencyModel.findOne({
           coinGeckoId: currency || 'usd',
         });
-        debugger
+        debugger;
       } else {
         if (!buyCryptoDto?.fromCoinId) {
           throw new Error('From coin is required in case of crypto payment');
@@ -3564,30 +3604,40 @@ export class WalletService {
       // fee is 0.5 USD
       const fromCoinAmount = buyCryptoDto?.amount;
 
-      const fromCoinAmountUsd = buyCryptoDto?.paymentMethod?.toUpperCase() === BuyCryptoPaymentMethodDTO.BANK_TRANSFER ? fromCoinAmount / fromCoinPrice?.price : fromCoinAmount * fromCoinPrice?.price;
+      const fromCoinAmountUsd =
+        buyCryptoDto?.paymentMethod?.toUpperCase() ===
+        BuyCryptoPaymentMethodDTO.BANK_TRANSFER
+          ? fromCoinAmount / fromCoinPrice?.price
+          : fromCoinAmount * fromCoinPrice?.price;
 
       const feeInUsd = 0.5;
-      const feeInFromCurrency = buyCryptoDto?.paymentMethod?.toUpperCase() === BuyCryptoPaymentMethodDTO.BANK_TRANSFER ? feeInUsd * fromCoinPrice?.price : feeInUsd / fromCoinPrice?.price;
+      const feeInFromCurrency =
+        buyCryptoDto?.paymentMethod?.toUpperCase() ===
+        BuyCryptoPaymentMethodDTO.BANK_TRANSFER
+          ? feeInUsd * fromCoinPrice?.price
+          : feeInUsd / fromCoinPrice?.price;
 
       const fromCoinAmountUsdAfterFee = fromCoinAmountUsd - feeInUsd;
 
       if (fromCoinAmountUsdAfterFee <= 0) {
-        if (buyCryptoDto?.fromCurrency === "usd") {
+        if (buyCryptoDto?.fromCurrency === 'usd') {
           throw new Error(`Amount is too low. Fee is ${feeInUsd} USD`);
         } else {
-          throw new Error(`Amount is too low. Fee is ${feeInFromCurrency} ${buyCryptoDto?.fromCurrency?.toUpperCase()}`);
+          throw new Error(
+            `Amount is too low. Fee is ${feeInFromCurrency} ${buyCryptoDto?.fromCurrency?.toUpperCase()}`,
+          );
         }
       }
 
       const toCoinAmount = fromCoinAmountUsdAfterFee / toCoinPrice?.price;
-      console.log("response", {
+      console.log('response', {
         fromCoinAmount: fromCoinAmount,
         fromCoinAmountUsd: fromCoinAmountUsd,
         toCoinPrice: toCoinPrice?.price,
         toCoinAmount: toCoinAmount,
         fee: feeInUsd,
         feeInCoin: feeInUsd * fromCoinPrice?.price,
-      })
+      });
       return {
         fromCoinAmount: fromCoinAmount,
         fromCoinAmountUsd: fromCoinAmountUsd,
@@ -3596,17 +3646,13 @@ export class WalletService {
         fee: feeInUsd,
         feeInCoin: feeInUsd * fromCoinPrice?.price,
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
   }
 
-  async buyCrypto(
-    buyCryptoDto: BuyCryptoDTO,
-    user,
-  ) {
+  async buyCrypto(buyCryptoDto: BuyCryptoDTO, user) {
     try {
       let fromCoin = null;
       let fromNetwork = null;
@@ -3622,7 +3668,10 @@ export class WalletService {
 
       buyCryptoDto.paymentMethod = buyCryptoDto?.paymentMethod?.toUpperCase();
 
-      if (buyCryptoDto?.paymentMethod?.toUpperCase() === BuyCryptoPaymentMethodDTO.BANK_TRANSFER) {
+      if (
+        buyCryptoDto?.paymentMethod?.toUpperCase() ===
+        BuyCryptoPaymentMethodDTO.BANK_TRANSFER
+      ) {
         fromCoin = await this._coinModel.findOne({
           coinNameId: 'tether',
         });
@@ -3648,15 +3697,15 @@ export class WalletService {
           _id: buyCryptoDto?.fromCoinId,
         });
 
-        debugger
+        debugger;
         if (!fromCoin) {
           throw new Error('Coin not found');
         }
-        debugger
+        debugger;
         fromNetwork = await this._networkModel.findOne({
           _id: fromCoin?.networkId,
         });
-        debugger
+        debugger;
         if (!fromNetwork) {
           throw new Error('Network not found');
         }
@@ -3670,10 +3719,10 @@ export class WalletService {
         } else if (fromNetwork?.networkType === NETWORKTYPEENUM.EVM) {
           walletAddress = wallet?.evmAddress;
         } else {
-          throw new Error("Invalid network");
+          throw new Error('Invalid network');
         }
 
-        debugger
+        debugger;
         // check balance
         userBalance = await this.getBalance(
           walletAddress,
@@ -3682,7 +3731,7 @@ export class WalletService {
           wallet?.id,
           user?.id,
           0,
-        )
+        );
 
         debugger;
 
@@ -3691,7 +3740,7 @@ export class WalletService {
         }
       }
 
-      debugger
+      debugger;
 
       const toCoin = await this._coinModel.findOne({
         symbol: 'TSION+',
@@ -3711,7 +3760,7 @@ export class WalletService {
       const toCoinAmount = quote?.toCoinAmount;
 
       const hotWalletAddress = process.env.EVM_HOT_WALLET;
-      debugger
+      debugger;
       // check hot wallet balance
       const hotWalletBalance = await this.getBalance(
         hotWalletAddress,
@@ -3721,11 +3770,10 @@ export class WalletService {
         user?.id,
         0,
       );
-      debugger
+      debugger;
       if (hotWalletBalance?.balance < quote?.toCoinAmount) {
         throw new Error('Insufficient Liquidity');
       }
-
 
       const userData = await this._userModel.findOne({
         _id: user.id,
@@ -3735,13 +3783,17 @@ export class WalletService {
         throw new Error('User not found');
       }
 
-      if (buyCryptoDto?.paymentMethod === BuyCryptoPaymentMethodDTO.BANK_TRANSFER) {
-        const depositBankDetail = await this._depositBankDetailModel.findOne({});
+      if (
+        buyCryptoDto?.paymentMethod === BuyCryptoPaymentMethodDTO.BANK_TRANSFER
+      ) {
+        const depositBankDetail = await this._depositBankDetailModel.findOne(
+          {},
+        );
 
         const transaction = await new this._transactionModel({
           userId: user?.id,
           walletId: wallet?.id,
-          fromAddress: "",
+          fromAddress: '',
           toAddress: wallet?.evmAddress,
           fromCoinId: fromCoin?.id,
           coinId: toCoin?.id,
@@ -3752,8 +3804,8 @@ export class WalletService {
           balance: 0,
           swappedAmount: toCoinAmount,
           swappedPrice: quote?.toCoinPrice,
-          trxHash: "",
-          trxUrl: "",
+          trxHash: '',
+          trxUrl: '',
           bankName: depositBankDetail?.bank,
           accountNumber: depositBankDetail?.accountNumber,
           accountName: depositBankDetail?.accountHolderName,
@@ -3776,19 +3828,22 @@ export class WalletService {
         } else if (fromNetwork?.networkType === NETWORKTYPEENUM?.BTC) {
           hotWalletAddress = process.env.BTC_HOT_WALLET;
         } else {
-          throw new Error("Invalid from coin network");
+          throw new Error('Invalid from coin network');
         }
-        debugger
+        debugger;
         const withdrawDto: WithdrawDTO = {
           coinId: fromCoin?.id,
           networkId: fromNetwork?.id,
           address: hotWalletAddress,
           amount: fromCoinAmount,
         };
-        debugger
-        const userToHotWalletTransaction = await this.sendAmount(user?.id, withdrawDto);
+        debugger;
+        const userToHotWalletTransaction = await this.sendAmount(
+          user?.id,
+          withdrawDto,
+        );
 
-        debugger
+        debugger;
 
         // send to coin amount from hot wallet to user wallet
         const toCoinWithdrawDto: WithdrawDTO = {
@@ -3796,18 +3851,22 @@ export class WalletService {
           networkId: toNetwork?.id,
           address: wallet?.evmAddress,
           amount: toCoinAmount,
-        }
-        const hotWalletToUserTransaction = await this.sendAmountFromMaster(toCoinWithdrawDto)?.catch(err => {
+        };
+        const hotWalletToUserTransaction = await this.sendAmountFromMaster(
+          toCoinWithdrawDto,
+        )?.catch((err) => {
           console.log(err);
           return null;
         });
 
-        let status = hotWalletToUserTransaction?.status ? TRANSACTIONSTATUSENUM.COMPLETED : TRANSACTIONSTATUSENUM.PENDING_FROM_SYSTEM;
+        let status = hotWalletToUserTransaction?.status
+          ? TRANSACTIONSTATUSENUM.COMPLETED
+          : TRANSACTIONSTATUSENUM.PENDING_FROM_SYSTEM;
 
         const transaction = await new this._transactionModel({
           userId: user?.id,
           walletId: wallet?.id,
-          fromAddress: "",
+          fromAddress: '',
           toAddress: wallet?.evmAddress,
           fromCoinId: fromCoin?.id,
           coinId: toCoin?.id,
@@ -3819,15 +3878,21 @@ export class WalletService {
           swappedAmount: toCoinAmount,
           swappedPrice: quote?.toCoinPrice,
           trxHash: userToHotWalletTransaction?.trxHash,
-          trxUrl: this.utilsService.getTransactionHashUrl(fromNetwork, userToHotWalletTransaction?.trxHash),
+          trxUrl: this.utilsService.getTransactionHashUrl(
+            fromNetwork,
+            userToHotWalletTransaction?.trxHash,
+          ),
           systemTrxHash: hotWalletToUserTransaction?.trxHash,
-          systemTrxUrl: this.utilsService.getTransactionHashUrl(toNetwork, hotWalletToUserTransaction?.trxHash),
-          bankName: "",
-          accountNumber: "",
-          accountName: "",
+          systemTrxUrl: this.utilsService.getTransactionHashUrl(
+            toNetwork,
+            hotWalletToUserTransaction?.trxHash,
+          ),
+          bankName: '',
+          accountNumber: '',
+          accountName: '',
           status: status,
-          currencyId: "",
-          proofOfPayment: "",
+          currencyId: '',
+          proofOfPayment: '',
           paymentMethod: buyCryptoDto?.paymentMethod,
         }).save();
 
@@ -3835,16 +3900,16 @@ export class WalletService {
 
         return transaction;
       }
-
-
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
   }
 
-  async updateStatusOfBuyCryptoTransaction(id: string, status: TRANSACTIONSTATUSENUM) {
+  async updateStatusOfBuyCryptoTransaction(
+    id: string,
+    status: TRANSACTIONSTATUSENUM,
+  ) {
     try {
       const transaction = await this._transactionModel.findOne({
         _id: id,
@@ -3864,13 +3929,16 @@ export class WalletService {
       }
 
       if (status === TRANSACTIONSTATUSENUM.REJECTED) {
-        await this._transactionModel.updateOne({
-          _id: id,
-        }, {
-          $set: {
-            status: status,
-          }
-        });
+        await this._transactionModel.updateOne(
+          {
+            _id: id,
+          },
+          {
+            $set: {
+              status: status,
+            },
+          },
+        );
       } else if (status === TRANSACTIONSTATUSENUM?.COMPLETED) {
         // send to coin amount from hot wallet to user wallet
         const toCoin = await this._coinModel.findOne({
@@ -3888,24 +3956,34 @@ export class WalletService {
           networkId: toNetwork?.id,
           address: transaction?.toAddress,
           amount: amountToSend,
-        }
+        };
 
-        const hotWalletToUserTransaction = await this.sendAmountFromMaster(toCoinWithdrawDto)?.catch(err => {
+        const hotWalletToUserTransaction = await this.sendAmountFromMaster(
+          toCoinWithdrawDto,
+        )?.catch((err) => {
           console.log(err);
           return null;
         });
 
-        let status = hotWalletToUserTransaction?.status ? TRANSACTIONSTATUSENUM.COMPLETED : TRANSACTIONSTATUSENUM.PENDING_FROM_SYSTEM;
+        let status = hotWalletToUserTransaction?.status
+          ? TRANSACTIONSTATUSENUM.COMPLETED
+          : TRANSACTIONSTATUSENUM.PENDING_FROM_SYSTEM;
 
-        await this._transactionModel.updateOne({
-          _id: id,
-        }, {
-          $set: {
-            status: status,
-            systemTrxHash: hotWalletToUserTransaction?.trxHash,
-            systemTrxUrl: this.utilsService.getTransactionHashUrl(toNetwork, hotWalletToUserTransaction?.trxHash),
-          }
-        });
+        await this._transactionModel.updateOne(
+          {
+            _id: id,
+          },
+          {
+            $set: {
+              status: status,
+              systemTrxHash: hotWalletToUserTransaction?.trxHash,
+              systemTrxUrl: this.utilsService.getTransactionHashUrl(
+                toNetwork,
+                hotWalletToUserTransaction?.trxHash,
+              ),
+            },
+          },
+        );
 
         // update balance for user
         await this.updateBalance(transaction?.userId);
@@ -3914,8 +3992,7 @@ export class WalletService {
       return {
         message: 'success',
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -4160,13 +4237,12 @@ export class WalletService {
       await sleep(1 * 1000);
       await this.coinService.updateStakingInfoForAllCoins([coinId]);
 
-      await this.coinService.getAllInvestmentData(investmentId)
+      await this.coinService.getAllInvestmentData(investmentId);
 
       return {
         message: 'success',
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
     }
   }
@@ -4193,7 +4269,7 @@ export class WalletService {
       if (!networkData) {
         throw new Error('Network not found');
       }
-      debugger
+      debugger;
       const stakingPlan = await this._stakingPlanModel.findOne({
         coinId: stakeDto?.coinId,
         planId: stakeDto?.planId,
@@ -4214,7 +4290,7 @@ export class WalletService {
       if (!walletData) {
         throw new Error('Wallet not found');
       }
-      debugger
+      debugger;
       const balanceData = await this.getBalance(
         walletData?.evmAddress,
         coinData,
@@ -4222,27 +4298,35 @@ export class WalletService {
         walletData?.id,
         user?.id,
         0,
-      )
+      );
 
       if (balanceData?.balance < stakeDto?.amount) {
         throw new Error('Insufficient balance');
       }
       const web3 = new Web3(networkData?.rpcUrl);
-      debugger
+      debugger;
       const amountInWei = web3.utils.toWei(String(stakeDto?.amount), 'ether');
       // coinData.contractAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd";
-      const coinContract: any = new web3.eth.Contract(abi?.token, coinData?.contractAddress);
+      const coinContract: any = new web3.eth.Contract(
+        abi?.token,
+        coinData?.contractAddress,
+      );
 
-      const privateKey = this.decryptData(walletData?.evmKey, process.env.ENCRYPTION_KEY);
-      debugger
+      const privateKey = this.decryptData(
+        walletData?.evmKey,
+        process.env.ENCRYPTION_KEY,
+      );
+      debugger;
       {
         // approval code
         const fromAddress = walletData?.evmAddress;
 
         const amountInWei = toWei(String(stakeDto?.amount), coinData?.decimal);
-        debugger
-        const allowance = await coinContract.methods.allowance(fromAddress, coinData?.stakingContractAddress).call();
-        debugger
+        debugger;
+        const allowance = await coinContract.methods
+          .allowance(fromAddress, coinData?.stakingContractAddress)
+          .call();
+        debugger;
         if (allowance < BigInt(amountInWei)) {
           let nonce = await web3.eth.getTransactionCount(fromAddress);
           let noncePending = await web3.eth.getTransactionCount(
@@ -4265,13 +4349,13 @@ export class WalletService {
               'pending',
             );
           }
-          debugger
+          debugger;
           let gasPrice = await web3.eth.getGasPrice();
-          debugger
+          debugger;
           let gasLimit = await coinContract.methods
             .approve(coinData?.stakingContractAddress, amountInWei)
             .estimateGas({ from: fromAddress });
-          debugger
+          debugger;
           // increase gas limit by 20%
           gasLimit = BigInt(Math.floor(Number(gasLimit) * 1.2));
           gasPrice = BigInt(Math.floor(Number(gasPrice) * 1.2));
@@ -4279,7 +4363,7 @@ export class WalletService {
           const amountForGas = BigInt(gasLimit * gasPrice);
 
           balance = await web3.eth.getBalance(fromAddress);
-          debugger
+          debugger;
           if (balance < amountForGas) {
             throw new Error('Insufficient balance for gas');
           }
@@ -4298,7 +4382,7 @@ export class WalletService {
 
           const signedTx = await web3.eth.accounts.signTransaction(
             tx,
-            privateKey
+            privateKey,
           );
 
           const receipt = await web3.eth.sendSignedTransaction(
@@ -4310,16 +4394,19 @@ export class WalletService {
           console.log('already have enough allowance');
         }
       }
-      debugger
-      const stakingContract: any = new web3.eth.Contract(abi?.staking, coinData?.stakingContractAddress);
-      debugger
+      debugger;
+      const stakingContract: any = new web3.eth.Contract(
+        abi?.staking,
+        coinData?.stakingContractAddress,
+      );
+      debugger;
       let nonce = await web3.eth.getTransactionCount(walletData?.evmAddress);
 
       let noncePending = await web3.eth.getTransactionCount(
         walletData?.evmAddress,
         'pending',
       );
-      debugger
+      debugger;
       while (noncePending !== nonce) {
         console.log(
           'waiting 10s for correct nonce...',
@@ -4335,7 +4422,7 @@ export class WalletService {
           'pending',
         );
       }
-      debugger
+      debugger;
       let gasPrice = await web3.eth.getGasPrice();
 
       let gasLimit = await stakingContract.methods
@@ -4344,13 +4431,13 @@ export class WalletService {
 
       gasLimit = BigInt(Math.floor(Number(gasLimit) * 1.2));
       gasPrice = BigInt(Math.floor(Number(gasPrice) * 1.2));
-      debugger
+      debugger;
 
       const gasAmountToBeDeducted = BigInt(gasLimit * gasPrice);
-      debugger
+      debugger;
 
       balance = await web3.eth.getBalance(walletData?.evmAddress);
-      debugger
+      debugger;
       if (balance < gasAmountToBeDeducted) {
         throw new Error('Insufficient balance for gas');
       }
@@ -4366,14 +4453,18 @@ export class WalletService {
         nonce: nonce,
         value: 0,
       };
-      debugger
+      debugger;
       const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
-      debugger
-      const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-      debugger
+      debugger;
+      const receipt = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction,
+      );
+      debugger;
       console.log('receipt', receipt);
-      await sleep(5 * 1000)
-      const investmentId = Number(await stakingContract.methods.investmentId().call());
+      await sleep(5 * 1000);
+      const investmentId = Number(
+        await stakingContract.methods.investmentId().call(),
+      );
       await this.updateStakeData(stakeDto?.coinId, [user?.id], investmentId);
 
       // add transaction
@@ -4399,7 +4490,10 @@ export class WalletService {
       };
     } catch (error) {
       console.log(error);
-      if (error?.message?.includes("Error happened during contract execution") && balance < MIN_BALANCE_FOR_TRANSACTION) {
+      if (
+        error?.message?.includes('Error happened during contract execution') &&
+        balance < MIN_BALANCE_FOR_TRANSACTION
+      ) {
         throw new BadRequestException('Insufficient balance for gas');
       }
       throw new BadRequestException(error?.message);
@@ -4439,22 +4533,42 @@ export class WalletService {
 
       const web3 = new Web3(networkData?.rpcUrl);
 
-      const stakingContract: any = new web3.eth.Contract(abi?.staking, coinData?.stakingContractAddress);
+      const stakingContract: any = new web3.eth.Contract(
+        abi?.staking,
+        coinData?.stakingContractAddress,
+      );
 
-      const privateKey = this.decryptData(walletData?.evmKey, process.env.ENCRYPTION_KEY);
+      const privateKey = this.decryptData(
+        walletData?.evmKey,
+        process.env.ENCRYPTION_KEY,
+      );
 
-      const investmentDataOnBlockchain = await stakingContract.methods.investments(withdrawRewardDto?.investmentId).call();
+      const investmentDataOnBlockchain = await stakingContract.methods
+        .investments(withdrawRewardDto?.investmentId)
+        .call();
 
-      if (investmentDataOnBlockchain?.user?.toLowerCase() !== walletData?.evmAddress?.toLowerCase()) {
+      if (
+        investmentDataOnBlockchain?.user?.toLowerCase() !==
+        walletData?.evmAddress?.toLowerCase()
+      ) {
         throw new Error('You are not the owner of this investment');
       }
 
-      if (Number(investmentDataOnBlockchain?.isWithdrawn) === 1 || Number(investmentDataOnBlockchain?.isClaimed) === 1) {
+      if (
+        Number(investmentDataOnBlockchain?.isWithdrawn) === 1 ||
+        Number(investmentDataOnBlockchain?.isClaimed) === 1
+      ) {
         throw new Error('Already withdrawn');
       }
-      const planOnBlockchain = await stakingContract.methods.investmentPlans(Number(investmentDataOnBlockchain?.planId))?.call();
+      const planOnBlockchain = await stakingContract.methods
+        .investmentPlans(Number(investmentDataOnBlockchain?.planId))
+        ?.call();
 
-      const canWithdraw = ((Number(investmentDataOnBlockchain?.start) + Number(planOnBlockchain?.duration)) * 1000) <= new Date().getTime();
+      const canWithdraw =
+        (Number(investmentDataOnBlockchain?.start) +
+          Number(planOnBlockchain?.duration)) *
+          1000 <=
+        new Date().getTime();
 
       if (!canWithdraw) {
         throw new Error('Cannot withdraw before the end of the plan');
@@ -4508,17 +4622,24 @@ export class WalletService {
         data: stakingContract.methods
           .withdrawReward(withdrawRewardDto?.investmentId)
           .encodeABI(),
-      }
+      };
 
       const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
 
-      const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+      const receipt = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction,
+      );
 
       const transactionHash = receipt?.transactionHash;
 
-      await this.coinService.updateStakingInfoForAllCoins([coinData?.id])?.then(async () => {
-        await this.coinService.getAllInvestmentDataForInvestmentIds([withdrawRewardDto?.investmentId], coinData?.id);
-      })
+      await this.coinService
+        .updateStakingInfoForAllCoins([coinData?.id])
+        ?.then(async () => {
+          await this.coinService.getAllInvestmentDataForInvestmentIds(
+            [withdrawRewardDto?.investmentId],
+            coinData?.id,
+          );
+        });
 
       // add transaction
       const withdrawTransaction = await new this._transactionModel({
@@ -4526,7 +4647,9 @@ export class WalletService {
         walletId: walletData?.id,
         coinId: coinData?.id,
         type: TRANSACTIONENUM.WITHDRAW_REWARD,
-        amount: Number(fromDecimals(investmentDataOnBlockchain?.amount, coinData?.decimal)),
+        amount: Number(
+          fromDecimals(investmentDataOnBlockchain?.amount, coinData?.decimal),
+        ),
         fee: 0,
         balance: 0,
         swappedAmount: null,
@@ -4541,10 +4664,12 @@ export class WalletService {
         },
         transaction: withdrawTransaction,
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
-      if (err?.message.includes("Error happened during contract execution") && balance < MIN_BALANCE_FOR_TRANSACTION) {
+      if (
+        err?.message.includes('Error happened during contract execution') &&
+        balance < MIN_BALANCE_FOR_TRANSACTION
+      ) {
         throw new BadRequestException('Insufficient balance for gas');
       }
       throw new BadRequestException(err?.message);
@@ -4584,28 +4709,46 @@ export class WalletService {
 
       const web3 = new Web3(networkData?.rpcUrl);
 
-      const stakingContract: any = new web3.eth.Contract(abi?.staking, coinData?.stakingContractAddress);
+      const stakingContract: any = new web3.eth.Contract(
+        abi?.staking,
+        coinData?.stakingContractAddress,
+      );
 
-      const privateKey = this.decryptData(walletData?.evmKey, process.env.ENCRYPTION_KEY);
+      const privateKey = this.decryptData(
+        walletData?.evmKey,
+        process.env.ENCRYPTION_KEY,
+      );
 
-      const investmentDataOnBlockchain = await stakingContract.methods.investments(withdrawRewardDto?.investmentId).call();
+      const investmentDataOnBlockchain = await stakingContract.methods
+        .investments(withdrawRewardDto?.investmentId)
+        .call();
 
-      if (investmentDataOnBlockchain?.user?.toLowerCase() !== walletData?.evmAddress?.toLowerCase()) {
+      if (
+        investmentDataOnBlockchain?.user?.toLowerCase() !==
+        walletData?.evmAddress?.toLowerCase()
+      ) {
         throw new Error('You are not the owner of this investment');
       }
 
-      if (Number(investmentDataOnBlockchain?.isWithdrawn) === 1 || Number(investmentDataOnBlockchain?.isClaimed) === 1) {
+      if (
+        Number(investmentDataOnBlockchain?.isWithdrawn) === 1 ||
+        Number(investmentDataOnBlockchain?.isClaimed) === 1
+      ) {
         throw new Error('Already withdrawn');
       }
-      const planOnBlockchain = await stakingContract.methods.investmentPlans(Number(investmentDataOnBlockchain?.planId))?.call();
-      debugger
-      const canWithdraw = ((Number(investmentDataOnBlockchain?.start) + Number(planOnBlockchain?.duration)) * 1000) <= new Date().getTime();
-      debugger
+      const planOnBlockchain = await stakingContract.methods
+        .investmentPlans(Number(investmentDataOnBlockchain?.planId))
+        ?.call();
+      debugger;
+      const canWithdraw =
+        (Number(investmentDataOnBlockchain?.start) +
+          Number(planOnBlockchain?.duration)) *
+          1000 <=
+        new Date().getTime();
+      debugger;
       if (canWithdraw) {
         return await this.withdrawReward(withdrawRewardDto, user);
       }
-
-
 
       let nonce = await web3.eth.getTransactionCount(walletData?.evmAddress);
 
@@ -4655,17 +4798,24 @@ export class WalletService {
         data: stakingContract.methods
           .withdrawAmount(withdrawRewardDto?.investmentId)
           .encodeABI(),
-      }
+      };
 
       const signedTx = await web3.eth.accounts.signTransaction(tx, privateKey);
 
-      const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+      const receipt = await web3.eth.sendSignedTransaction(
+        signedTx.rawTransaction,
+      );
 
       const transactionHash = receipt?.transactionHash;
 
-      await this.coinService.updateStakingInfoForAllCoins([coinData?.id])?.then(async () => {
-        await this.coinService.getAllInvestmentDataForInvestmentIds([withdrawRewardDto?.investmentId], coinData?.id);
-      })
+      await this.coinService
+        .updateStakingInfoForAllCoins([coinData?.id])
+        ?.then(async () => {
+          await this.coinService.getAllInvestmentDataForInvestmentIds(
+            [withdrawRewardDto?.investmentId],
+            coinData?.id,
+          );
+        });
 
       // add transaction
       const withdrawTransaction = await new this._transactionModel({
@@ -4688,18 +4838,24 @@ export class WalletService {
         },
         transaction: withdrawTransaction,
       };
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
-      if (err?.message.includes("Error happened during contract execution") && balance < MIN_BALANCE_FOR_TRANSACTION) {
+      if (
+        err?.message.includes('Error happened during contract execution') &&
+        balance < MIN_BALANCE_FOR_TRANSACTION
+      ) {
         throw new BadRequestException('Insufficient balance for gas');
       }
       throw new BadRequestException(err?.message);
     }
   }
 
-
-  async getUserStakeData(coinId: string, limit: number, offset: number, userId: string) {
+  async getUserStakeData(
+    coinId: string,
+    limit: number,
+    offset: number,
+    userId: string,
+  ) {
     try {
       limit = Number(limit) ? Number(limit) : 10;
       offset = Number(offset) ? Number(offset) : 0;
@@ -4716,272 +4872,275 @@ export class WalletService {
         throw new Error('Staking is not available for this coin');
       }
 
-      let userStakeInformation = await this._userStakeInfoModel.aggregate([
-        {
-          $match: {
-            userId: userId,
-            coinId: coinId,
+      let userStakeInformation = await this._userStakeInfoModel
+        .aggregate([
+          {
+            $match: {
+              userId: userId,
+              coinId: coinId,
+            },
           },
-        },
-        {
-          $lookup: {
-            from: 'stakeinvestmentinfos',
-            let: { investmentIds: '$investmentIds' },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $in: ['$investmentId', '$$investmentIds'],
+          {
+            $lookup: {
+              from: 'stakeinvestmentinfos',
+              let: { investmentIds: '$investmentIds' },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $in: ['$investmentId', '$$investmentIds'],
+                    },
                   },
                 },
-              },
-              {
-                $lookup: {
-                  from: 'stakingplans',
-                  localField: 'planId',
-                  foreignField: 'planId',
-                  as: 'plan',
+                {
+                  $lookup: {
+                    from: 'stakingplans',
+                    localField: 'planId',
+                    foreignField: 'planId',
+                    as: 'plan',
+                  },
                 },
-              },
-              {
-                $unwind: '$plan',
-              },
-              {
-                $sort: {
-                  startDate: -1,
+                {
+                  $unwind: '$plan',
                 },
-              },
-              {
-                $skip: offset,
-              },
-              {
-                $limit: limit,
-              },
-              {
-                $addFields: {
-                  id: '$_id',
-                  'plan.id': '$plan._id',
-                  // number of days remaining, divide by ONE_DAY to get number of days
-                  daysRemaining: {
-                    $divide: [
+                {
+                  $sort: {
+                    startDate: -1,
+                  },
+                },
+                {
+                  $skip: offset,
+                },
+                {
+                  $limit: limit,
+                },
+                {
+                  $addFields: {
+                    id: '$_id',
+                    'plan.id': '$plan._id',
+                    // number of days remaining, divide by ONE_DAY to get number of days
+                    daysRemaining: {
+                      $divide: [
+                        {
+                          $subtract: ['$endDate', new Date().getTime()],
+                        },
+                        ONE_DAY,
+                      ],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    'plan._id': 0,
+                  },
+                },
+              ],
+              as: 'investmentData',
+            },
+          },
+          {
+            $lookup: {
+              from: 'stakeinvestmentinfos',
+              let: { investmentIds: '$investmentIds' },
+              pipeline: [
+                {
+                  $match: {
+                    // investmentId, isClaimed is false, isWithdrawn is false
+                    $and: [
                       {
-                        $subtract: [
-                          "$endDate",
-                          new Date().getTime(),
-                        ],
+                        $expr: {
+                          $in: ['$investmentId', '$$investmentIds'],
+                        },
                       },
-                      ONE_DAY,
+                      {
+                        $expr: {
+                          $eq: ['$isClaimed', false],
+                        },
+                      },
+                      {
+                        $expr: {
+                          $eq: ['$isWithdrawn', false],
+                        },
+                      },
                     ],
                   },
                 },
-              },
-              {
-                $project: {
-                  _id: 0,
-                  'plan._id': 0,
-                },
-              },
-            ],
-            as: 'investmentData',
-          },
-        },
-        {
-          $lookup: {
-            from: 'stakeinvestmentinfos',
-            let: { investmentIds: '$investmentIds' },
-            pipeline: [
-              {
-                $match: {
-                  // investmentId, isClaimed is false, isWithdrawn is false
-                  $and: [
-                    {
-                      $expr: {
-                        $in: ['$investmentId', '$$investmentIds'],
+                {
+                  $group: {
+                    _id: null,
+                    totalAmount: {
+                      $sum: '$amount',
+                    },
+                    totalRewardToClaim: {
+                      $sum: {
+                        $cond: [
+                          {
+                            $and: [
+                              {
+                                $lt: ['$endDate', new Date().getTime()],
+                              },
+                              {
+                                $eq: ['$isClaimed', false],
+                              },
+                            ],
+                          },
+                          '$totalReward',
+                          0,
+                        ],
                       },
                     },
-                    {
-                      $expr: {
-                        $eq: ['$isClaimed', false],
+                    // totalClaimedReward, if isClaimed is true
+                    totalClaimedReward: {
+                      $sum: {
+                        $cond: [
+                          {
+                            $eq: ['$isClaimed', false],
+                          },
+                          '$amount',
+                          //   // ($amount * $plan.interestRate/100)
+                          //   {
+                          //     // $multiply: ['$amount', { $divide: ['$plan.interestRate', 100] }],
+                          //     $multiply: ['$amount', 10],
+                          //   },
+                          0,
+                        ],
                       },
                     },
-                    {
-                      $expr: {
-                        $eq: ['$isWithdrawn', false],
+                    activeInvestmentAmount: {
+                      $sum: {
+                        $cond: [
+                          {
+                            $and: [
+                              {
+                                $eq: ['$isClaimed', false],
+                              },
+                              {
+                                $gte: ['$endDate', new Date().getTime()],
+                              },
+                            ],
+                          },
+                          '$amount',
+                          0,
+                        ],
                       },
                     },
-                  ],
-                },
-              },
-              {
-                $group: {
-                  _id: null,
-                  totalAmount: {
-                    $sum: '$amount',
+                    dailyReward: {
+                      $sum: '$dailyReward',
+                    },
                   },
-                  totalRewardToClaim: {
-                    $sum: {
-                      $cond: [
-                        {
-                          $and: [
-                            {
-                              $lt: ['$endDate', new Date().getTime()],
-                            },
-                            {
-                              $eq: ['$isClaimed', false],
-                            },
-                          ],
+                },
+              ],
+              as: 'activeInvestmentData',
+            },
+          },
+          {
+            $unwind: {
+              path: '$activeInvestmentData',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'stakeinvestmentinfos',
+              let: { investmentIds: '$investmentIds' },
+              pipeline: [
+                {
+                  $match: {
+                    // investmentId, isClaimed is false, isWithdrawn is false
+                    $and: [
+                      {
+                        $expr: {
+                          $in: ['$investmentId', '$$investmentIds'],
                         },
-                        '$totalReward',
-                        0,
-                      ],
-                    },
-                  },
-                  // totalClaimedReward, if isClaimed is true
-                  totalClaimedReward: {
-                    $sum: {
-                      $cond: [
-                        {
-                          $eq: ['$isClaimed', false],
+                      },
+                      {
+                        $expr: {
+                          $eq: ['$isClaimed', true],
                         },
-                        "$amount",
-                        //   // ($amount * $plan.interestRate/100)
-                        //   {
-                        //     // $multiply: ['$amount', { $divide: ['$plan.interestRate', 100] }],
-                        //     $multiply: ['$amount', 10],
-                        //   },
-                        0,
-                      ],
-
-                    },
-                  },
-                  activeInvestmentAmount: {
-                    $sum: {
-                      $cond: [
-                        {
-                          $and: [
-                            {
-                              $eq: ['$isClaimed', false],
-                            },
-                            {
-                              $gte: ['$endDate', new Date().getTime()],
-                            },
-                          ],
-                        },
-                        '$amount',
-                        0,
-                      ],
-                    },
-                  },
-                  dailyReward: {
-                    $sum: '$dailyReward',
+                      },
+                    ],
                   },
                 },
-              },
-            ],
-            as: 'activeInvestmentData',
-          },
-        },
-        {
-          $unwind: {
-            path: '$activeInvestmentData',
-            preserveNullAndEmptyArrays: true,
-          },
-        },
-        {
-          $lookup: {
-            from: 'stakeinvestmentinfos',
-            let: { investmentIds: '$investmentIds' },
-            pipeline: [
-              {
-                $match: {
-                  // investmentId, isClaimed is false, isWithdrawn is false
-                  $and: [
-                    {
-                      $expr: {
-                        $in: ['$investmentId', '$$investmentIds'],
+                {
+                  // plan lookup
+                  $lookup: {
+                    from: 'stakingplans',
+                    localField: 'planId',
+                    foreignField: 'planId',
+                    as: 'plan',
+                  },
+                },
+                {
+                  $unwind: '$plan',
+                },
+                {
+                  $group: {
+                    _id: null,
+                    totalClaimedReward: {
+                      $sum: {
+                        $multiply: [
+                          '$amount',
+                          { $divide: ['$plan.interestRate', 100] },
+                        ],
                       },
                     },
-                    {
-                      $expr: {
-                        $eq: ['$isClaimed', true],
-                      }
-                    },
-                  ],
-                },
-              },
-              {
-                // plan lookup
-                $lookup: {
-                  from: 'stakingplans',
-                  localField: 'planId',
-                  foreignField: 'planId',
-                  as: 'plan',
-                },
-              },
-              {
-                $unwind: '$plan',
-              },
-              {
-                $group: {
-                  _id: null,
-                  totalClaimedReward: {
-                    $sum: {
-                      $multiply: ['$amount', { $divide: ['$plan.interestRate', 100] }],
-                    },
                   },
                 },
-              },
-            ],
-            as: 'totalClaimedData',
+              ],
+              as: 'totalClaimedData',
+            },
           },
-        },
-        {
-          $unwind: {
-            path: '$totalClaimedData',
-            preserveNullAndEmptyArrays: true,
+          {
+            $unwind: {
+              path: '$totalClaimedData',
+              preserveNullAndEmptyArrays: true,
+            },
           },
-        },
-        {
-          $limit: 1,
-        },
-        {
-          $lookup: {
-            from: 'stakinginfos',
-            localField: 'coinId',
-            foreignField: 'coinId',
-            as: 'stakingInfo'
+          {
+            $limit: 1,
           },
-        },
-        {
-          $unwind: {
-            path: '$stakingInfo',
-            preserveNullAndEmptyArrays: true
+          {
+            $lookup: {
+              from: 'stakinginfos',
+              localField: 'coinId',
+              foreignField: 'coinId',
+              as: 'stakingInfo',
+            },
           },
-        },
-        {
-          $addFields: {
-            id: '$_id',
-            'stakingInfo.id': '$stakingInfo._id',
+          {
+            $unwind: {
+              path: '$stakingInfo',
+              preserveNullAndEmptyArrays: true,
+            },
           },
-        },
-        {
-          $project: {
-            _id: 0,
-            'activeInvestmentData._id': 0,
-            'stakingInfo._id': 0,
+          {
+            $addFields: {
+              id: '$_id',
+              'stakingInfo.id': '$stakingInfo._id',
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              'activeInvestmentData._id': 0,
+              'stakingInfo._id': 0,
+            },
+          },
+        ])
+        ?.then((res) => res?.[0])
+        ?.then((data) => {
+          if (data?.investmentData?.length) {
+            data.investmentData = data?.investmentData?.map((item) => {
+              return {
+                ...item,
+                daysRemaining:
+                  item?.daysRemaining > 0 ? Math.floor(item?.daysRemaining) : 0,
+              };
+            });
           }
-        },
-      ])?.then((res) => res?.[0])?.then(data => {
-        if (data?.investmentData?.length) {
-          data.investmentData = data?.investmentData?.map((item) => {
-            return {
-              ...item,
-              daysRemaining: item?.daysRemaining > 0 ? Math.floor(item?.daysRemaining) : 0,
-            }
-          })
-        }
-        return data;
-      });
+          return data;
+        });
 
       if (!userStakeInformation) {
         let stakeInfo: any = await this._stakingInfoModel.findOne({
@@ -4990,39 +5149,37 @@ export class WalletService {
 
         if (!stakeInfo) {
           stakeInfo = {
-            "coinId": coinId,
-            "networkId": coinData?.networkId,
-            "stakingContractAddress": coinData?.stakingContractAddress,
-            "totalInvestments": 0,
-            "totalReward": 0,
-            "totalStaked": 0,
-            "id": ""
+            coinId: coinId,
+            networkId: coinData?.networkId,
+            stakingContractAddress: coinData?.stakingContractAddress,
+            totalInvestments: 0,
+            totalReward: 0,
+            totalStaked: 0,
+            id: '',
           };
         }
 
         userStakeInformation = {
-          "userId": userId,
-          "coinId": coinId,
-          "investmentIds": [],
-          "stakingContractAddress": coinData?.stakingContractAddress,
-          "totalInvestments": 0,
-          "totalRewards": 0,
-          "totalStaked": 0,
-          "investmentData": [],
-          "activeInvestmentData": {
-            "totalAmount": 0,
-            "totalRewardToClaim": 0,
-            "dailyReward": 0,
-
+          userId: userId,
+          coinId: coinId,
+          investmentIds: [],
+          stakingContractAddress: coinData?.stakingContractAddress,
+          totalInvestments: 0,
+          totalRewards: 0,
+          totalStaked: 0,
+          investmentData: [],
+          activeInvestmentData: {
+            totalAmount: 0,
+            totalRewardToClaim: 0,
+            dailyReward: 0,
           },
-          "stakingInfo": stakeInfo,
-          "id": ""
+          stakingInfo: stakeInfo,
+          id: '',
         };
       }
 
       return userStakeInformation;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5030,22 +5187,24 @@ export class WalletService {
 
   async getStakingPlans() {
     try {
-      return await this._stakingPlanModel.find({
-        isActive: true,
-      })?.sort({
-        duration: 1,
-      })?.then((data) =>
-        data?.map((item) => {
-          const durationInDays = item?.duration / ONE_DAY;
+      return await this._stakingPlanModel
+        .find({
+          isActive: true,
+        })
+        ?.sort({
+          duration: 1,
+        })
+        ?.then((data) =>
+          data?.map((item) => {
+            const durationInDays = item?.duration / ONE_DAY;
 
-          return {
-            ...item?.toJSON(),
-            durationInDays: durationInDays,
-          };
-        }),
-      );
-    }
-    catch (err) {
+            return {
+              ...item?.toJSON(),
+              durationInDays: durationInDays,
+            };
+          }),
+        );
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5056,14 +5215,15 @@ export class WalletService {
     try {
       const web3 = new Web3();
       return web3.utils.isAddress(address);
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       return false;
     }
   }
 
-  async addDonationOrganization(addDonationOrganizationDto: AddDonationOrganizationDTO) {
+  async addDonationOrganization(
+    addDonationOrganizationDto: AddDonationOrganizationDTO,
+  ) {
     try {
       if (!addDonationOrganizationDto?.name) {
         throw new Error('Name is required');
@@ -5073,7 +5233,9 @@ export class WalletService {
         throw new Error('Invalid address');
       }
 
-      const organization = await new this._donationOrganizationModel(addDonationOrganizationDto).save();
+      const organization = await new this._donationOrganizationModel(
+        addDonationOrganizationDto,
+      ).save();
 
       return organization;
     } catch (err) {
@@ -5082,19 +5244,29 @@ export class WalletService {
     }
   }
 
-  async updateDonationOrganization(id: string, updateDonationOrganizationDto: UpdateDonationOrganizationDTO) {
+  async updateDonationOrganization(
+    id: string,
+    updateDonationOrganizationDto: UpdateDonationOrganizationDTO,
+  ) {
     try {
-      if (updateDonationOrganizationDto?.walletAddress && !this.validateAddress(updateDonationOrganizationDto?.walletAddress)) {
+      if (
+        updateDonationOrganizationDto?.walletAddress &&
+        !this.validateAddress(updateDonationOrganizationDto?.walletAddress)
+      ) {
         throw new Error('Invalid address');
       }
-      const organization = await this._donationOrganizationModel.findOneAndUpdate({
-        _id: id,
-      }, updateDonationOrganizationDto, {
-        new: true,
-      });
+      const organization =
+        await this._donationOrganizationModel.findOneAndUpdate(
+          {
+            _id: id,
+          },
+          updateDonationOrganizationDto,
+          {
+            new: true,
+          },
+        );
       return organization;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5102,14 +5274,16 @@ export class WalletService {
 
   async deleteDonationOrganization(id: string) {
     try {
-      const organization = await this._donationOrganizationModel.updateOne({
-        _id: id,
-      }, {
-        isDeleted: true,
-      });
+      const organization = await this._donationOrganizationModel.updateOne(
+        {
+          _id: id,
+        },
+        {
+          isDeleted: true,
+        },
+      );
       return organization;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5124,8 +5298,7 @@ export class WalletService {
       limit = Number(limit) ? Number(limit) : 10;
       offset = Number(offset) ? Number(offset) : 0;
 
-      let query = {
-      };
+      let query = {};
 
       if (name) {
         query = {
@@ -5137,17 +5310,17 @@ export class WalletService {
         };
       }
 
-      const organizations = await this._donationOrganizationModel.find({
-        isActive: true,
-        isDeleted: false,
-        ...query,
-      })
+      const organizations = await this._donationOrganizationModel
+        .find({
+          isActive: true,
+          isDeleted: false,
+          ...query,
+        })
         .skip(offset)
         .limit(limit);
 
       return organizations;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5162,8 +5335,7 @@ export class WalletService {
       limit = Number(limit) ? Number(limit) : 10;
       offset = Number(offset) ? Number(offset) : 0;
 
-      let query = {
-      };
+      let query = {};
 
       if (name) {
         query = {
@@ -5175,17 +5347,17 @@ export class WalletService {
         };
       }
 
-      const organizations = await this._donationOrganizationModel.find({
-        isActive: true,
-        isDeleted: false,
-        ...query,
-      })
+      const organizations = await this._donationOrganizationModel
+        .find({
+          isActive: true,
+          isDeleted: false,
+          ...query,
+        })
         .skip(offset)
         .limit(limit);
 
       return organizations;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }
@@ -5198,8 +5370,7 @@ export class WalletService {
       });
 
       return organization;
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err);
       throw new BadRequestException(err?.message);
     }

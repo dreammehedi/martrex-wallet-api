@@ -1,8 +1,8 @@
-import { Types } from 'mongoose';
-import * as TronWeb from 'tronweb';
 import * as bitcoin from 'bitcoinjs-lib';
 import { ECPairFactory } from 'ecpair';
+import { Types } from 'mongoose';
 import * as ecc from 'tiny-secp256k1';
+import { TronWeb } from 'tronweb';
 import { Web3 } from 'web3';
 export const ECPair = ECPairFactory(ecc);
 export const BITCOIN_NETWORK = bitcoin.networks.testnet;
@@ -24,11 +24,11 @@ export const TRONGRID_API_KEY = '9c4f68b0-2579-4a1b-b08f-220bad91880d';
 
 export const BITCOIN_TOKEN = 'f38f051514e5447dbe6b02d12b11450f';
 
-const HttpProvider = TronWeb.providers.HttpProvider;
-const fullNode = new HttpProvider(TRON_RPC);
+// const HttpProvider = TronWeb.providers.HttpProvider;
+// const fullNode = new HttpProvider(TRON_RPC);
 
 export const tronWeb = new TronWeb({
-  fullHost: fullNode,
+  fullHost: TRON_RPC,
   headers: { 'TRON-PRO-API-KEY': TRONGRID_API_KEY },
 });
 
@@ -49,14 +49,18 @@ export const fromDecimals = (
   number: string | number | bigint,
   decimals: number,
 ) => {
-  return (Number(number) / Math.pow(10, decimals))?.toLocaleString()?.replace(/,/g, '');
+  return (Number(number) / Math.pow(10, decimals))
+    ?.toLocaleString()
+    ?.replace(/,/g, '');
 };
 
 export const toDecimals = (
   number: string | number | bigint,
   decimals: number,
 ) => {
-  return Math.floor(Number(number) * Math.pow(10, decimals))?.toLocaleString()?.replace(/,/g, '');
+  return Math.floor(Number(number) * Math.pow(10, decimals))
+    ?.toLocaleString()
+    ?.replace(/,/g, '');
 };
 
 const isBN = function (object) {
@@ -89,10 +93,171 @@ export const toWei = (value, decimal) => {
 
 export const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
+};
 
 export const abi: any = {
-  token: [{ "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "allowance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" }], "name": "ERC20InsufficientAllowance", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }, { "internalType": "uint256", "name": "balance", "type": "uint256" }, { "internalType": "uint256", "name": "needed", "type": "uint256" }], "name": "ERC20InsufficientBalance", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "approver", "type": "address" }], "name": "ERC20InvalidApprover", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "receiver", "type": "address" }], "name": "ERC20InvalidReceiver", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }], "name": "ERC20InvalidSender", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }], "name": "ERC20InvalidSpender", "type": "error" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "owner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "spender", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "from", "type": "address" }, { "indexed": true, "internalType": "address", "name": "to", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "Transfer", "type": "event" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }, { "internalType": "address", "name": "spender", "type": "address" }], "name": "allowance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "approve", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "balanceOf", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "decimals", "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "name", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "symbol", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalSupply", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "transfer", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "from", "type": "address" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "value", "type": "uint256" }], "name": "transferFrom", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "nonpayable", "type": "function" }],
+  token: [
+    { inputs: [], stateMutability: 'nonpayable', type: 'constructor' },
+    {
+      inputs: [
+        { internalType: 'address', name: 'spender', type: 'address' },
+        { internalType: 'uint256', name: 'allowance', type: 'uint256' },
+        { internalType: 'uint256', name: 'needed', type: 'uint256' },
+      ],
+      name: 'ERC20InsufficientAllowance',
+      type: 'error',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'sender', type: 'address' },
+        { internalType: 'uint256', name: 'balance', type: 'uint256' },
+        { internalType: 'uint256', name: 'needed', type: 'uint256' },
+      ],
+      name: 'ERC20InsufficientBalance',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'approver', type: 'address' }],
+      name: 'ERC20InvalidApprover',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'receiver', type: 'address' }],
+      name: 'ERC20InvalidReceiver',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'sender', type: 'address' }],
+      name: 'ERC20InvalidSender',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'spender', type: 'address' }],
+      name: 'ERC20InvalidSpender',
+      type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'owner',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'spender',
+          type: 'address',
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'value',
+          type: 'uint256',
+        },
+      ],
+      name: 'Approval',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'from',
+          type: 'address',
+        },
+        { indexed: true, internalType: 'address', name: 'to', type: 'address' },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'value',
+          type: 'uint256',
+        },
+      ],
+      name: 'Transfer',
+      type: 'event',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'owner', type: 'address' },
+        { internalType: 'address', name: 'spender', type: 'address' },
+      ],
+      name: 'allowance',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'spender', type: 'address' },
+        { internalType: 'uint256', name: 'value', type: 'uint256' },
+      ],
+      name: 'approve',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+      name: 'balanceOf',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'decimals',
+      outputs: [{ internalType: 'uint8', name: '', type: 'uint8' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'name',
+      outputs: [{ internalType: 'string', name: '', type: 'string' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'symbol',
+      outputs: [{ internalType: 'string', name: '', type: 'string' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalSupply',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'to', type: 'address' },
+        { internalType: 'uint256', name: 'value', type: 'uint256' },
+      ],
+      name: 'transfer',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: 'from', type: 'address' },
+        { internalType: 'address', name: 'to', type: 'address' },
+        { internalType: 'uint256', name: 'value', type: 'uint256' },
+      ],
+      name: 'transferFrom',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
   erc721: [
     {
       anonymous: false,
@@ -795,7 +960,451 @@ export const abi: any = {
       type: 'function',
     },
   ],
-  staking: [{ "inputs": [{ "internalType": "address", "name": "_tsion", "type": "address" }, { "internalType": "uint256", "name": "_startTime", "type": "uint256" }], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "EnforcedPause", "type": "error" }, { "inputs": [], "name": "ExpectedPause", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }], "name": "OwnableInvalidOwner", "type": "error" }, { "inputs": [{ "internalType": "address", "name": "account", "type": "address" }], "name": "OwnableUnauthorizedAccount", "type": "error" }, { "anonymous": false, "inputs": [{ "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" }, { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }], "name": "OwnershipTransferred", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Paused", "type": "event" }, { "anonymous": false, "inputs": [{ "indexed": false, "internalType": "address", "name": "account", "type": "address" }], "name": "Unpaused", "type": "event" }, { "inputs": [], "name": "MAX_INVESTMENTS_PER_USER", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "PECENTAGE_FACTOR", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_duration", "type": "uint256" }, { "internalType": "uint256", "name": "_interest", "type": "uint256" }], "name": "addInvestmentPlan", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "depositTsion", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_investmentId", "type": "uint256" }], "name": "getCurrentReward", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }], "name": "getInvestment", "outputs": [{ "components": [{ "internalType": "uint256", "name": "id", "type": "uint256" }, { "internalType": "address", "name": "user", "type": "address" }, { "internalType": "uint256", "name": "planId", "type": "uint256" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256", "name": "start", "type": "uint256" }, { "internalType": "uint256", "name": "isClaimed", "type": "uint256" }, { "internalType": "uint256", "name": "isWithdrawn", "type": "uint256" }], "internalType": "struct TsionStaking.Investment", "name": "", "type": "tuple" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }], "name": "getInvestor", "outputs": [{ "components": [{ "internalType": "address", "name": "user", "type": "address" }, { "internalType": "uint256", "name": "totalInvestments", "type": "uint256" }, { "internalType": "uint256", "name": "totalStaked", "type": "uint256" }, { "internalType": "uint256", "name": "totalRewards", "type": "uint256" }], "internalType": "struct TsionStaking.Investor", "name": "", "type": "tuple" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }], "name": "getTotalReward", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }], "name": "getTotalWithdrawableReward", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "getTsionBalance", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }], "name": "getUserInvestmentIds", "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_investmentId", "type": "uint256" }], "name": "getWithdrawableReward", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_planId", "type": "uint256" }, { "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "invest", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "investmentId", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "investmentPlanId", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "name": "investmentPlans", "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }, { "internalType": "uint256", "name": "duration", "type": "uint256" }, { "internalType": "uint256", "name": "interest", "type": "uint256" }, { "internalType": "uint256", "name": "isActive", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "name": "investments", "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }, { "internalType": "address", "name": "user", "type": "address" }, { "internalType": "uint256", "name": "planId", "type": "uint256" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }, { "internalType": "uint256", "name": "start", "type": "uint256" }, { "internalType": "uint256", "name": "isClaimed", "type": "uint256" }, { "internalType": "uint256", "name": "isWithdrawn", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }], "name": "investors", "outputs": [{ "internalType": "address", "name": "user", "type": "address" }, { "internalType": "uint256", "name": "totalInvestments", "type": "uint256" }, { "internalType": "uint256", "name": "totalStaked", "type": "uint256" }, { "internalType": "uint256", "name": "totalRewards", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "owner", "outputs": [{ "internalType": "address", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "pause", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "paused", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_maxInvestmentsPerUser", "type": "uint256" }], "name": "setMaxInvestmentsPerUser", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_tax", "type": "uint256" }], "name": "setTax", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "startTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "tax", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalInvestments", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalInvestors", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalOwnerAddedFunds", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalRewards", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalStaked", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalTaxCollected", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalUnwithdrawnOwnerAddedFunds", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "totalUnwithdrawnTax", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "tsion", "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "unpause", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_id", "type": "uint256" }, { "internalType": "uint256", "name": "_duration", "type": "uint256" }, { "internalType": "uint256", "name": "_interest", "type": "uint256" }, { "internalType": "uint256", "name": "_isActive", "type": "uint256" }], "name": "updateInvestmentPlan", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "address", "name": "", "type": "address" }, { "internalType": "uint256", "name": "", "type": "uint256" }], "name": "userInvestments", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_investmentId", "type": "uint256" }], "name": "withdrawAmount", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "withdrawFunds", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_investmentId", "type": "uint256" }], "name": "withdrawReward", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "uint256", "name": "_amount", "type": "uint256" }], "name": "withdrawTax", "outputs": [], "stateMutability": "nonpayable", "type": "function" }],
+  staking: [
+    {
+      inputs: [
+        { internalType: 'address', name: '_tsion', type: 'address' },
+        { internalType: 'uint256', name: '_startTime', type: 'uint256' },
+      ],
+      stateMutability: 'nonpayable',
+      type: 'constructor',
+    },
+    { inputs: [], name: 'EnforcedPause', type: 'error' },
+    { inputs: [], name: 'ExpectedPause', type: 'error' },
+    {
+      inputs: [{ internalType: 'address', name: 'owner', type: 'address' }],
+      name: 'OwnableInvalidOwner',
+      type: 'error',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'account', type: 'address' }],
+      name: 'OwnableUnauthorizedAccount',
+      type: 'error',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'previousOwner',
+          type: 'address',
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'newOwner',
+          type: 'address',
+        },
+      ],
+      name: 'OwnershipTransferred',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+      ],
+      name: 'Paused',
+      type: 'event',
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'account',
+          type: 'address',
+        },
+      ],
+      name: 'Unpaused',
+      type: 'event',
+    },
+    {
+      inputs: [],
+      name: 'MAX_INVESTMENTS_PER_USER',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'PECENTAGE_FACTOR',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_duration', type: 'uint256' },
+        { internalType: 'uint256', name: '_interest', type: 'uint256' },
+      ],
+      name: 'addInvestmentPlan',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '_amount', type: 'uint256' }],
+      name: 'depositTsion',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_investmentId', type: 'uint256' },
+      ],
+      name: 'getCurrentReward',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '_id', type: 'uint256' }],
+      name: 'getInvestment',
+      outputs: [
+        {
+          components: [
+            { internalType: 'uint256', name: 'id', type: 'uint256' },
+            { internalType: 'address', name: 'user', type: 'address' },
+            { internalType: 'uint256', name: 'planId', type: 'uint256' },
+            { internalType: 'uint256', name: 'amount', type: 'uint256' },
+            { internalType: 'uint256', name: 'start', type: 'uint256' },
+            { internalType: 'uint256', name: 'isClaimed', type: 'uint256' },
+            { internalType: 'uint256', name: 'isWithdrawn', type: 'uint256' },
+          ],
+          internalType: 'struct TsionStaking.Investment',
+          name: '',
+          type: 'tuple',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: '_user', type: 'address' }],
+      name: 'getInvestor',
+      outputs: [
+        {
+          components: [
+            { internalType: 'address', name: 'user', type: 'address' },
+            {
+              internalType: 'uint256',
+              name: 'totalInvestments',
+              type: 'uint256',
+            },
+            { internalType: 'uint256', name: 'totalStaked', type: 'uint256' },
+            { internalType: 'uint256', name: 'totalRewards', type: 'uint256' },
+          ],
+          internalType: 'struct TsionStaking.Investor',
+          name: '',
+          type: 'tuple',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: '_user', type: 'address' }],
+      name: 'getTotalReward',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: '_user', type: 'address' }],
+      name: 'getTotalWithdrawableReward',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'getTsionBalance',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: '_user', type: 'address' }],
+      name: 'getUserInvestmentIds',
+      outputs: [{ internalType: 'uint256[]', name: '', type: 'uint256[]' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_investmentId', type: 'uint256' },
+      ],
+      name: 'getWithdrawableReward',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_planId', type: 'uint256' },
+        { internalType: 'uint256', name: '_amount', type: 'uint256' },
+      ],
+      name: 'invest',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'investmentId',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'investmentPlanId',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      name: 'investmentPlans',
+      outputs: [
+        { internalType: 'uint256', name: 'id', type: 'uint256' },
+        { internalType: 'uint256', name: 'duration', type: 'uint256' },
+        { internalType: 'uint256', name: 'interest', type: 'uint256' },
+        { internalType: 'uint256', name: 'isActive', type: 'uint256' },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      name: 'investments',
+      outputs: [
+        { internalType: 'uint256', name: 'id', type: 'uint256' },
+        { internalType: 'address', name: 'user', type: 'address' },
+        { internalType: 'uint256', name: 'planId', type: 'uint256' },
+        { internalType: 'uint256', name: 'amount', type: 'uint256' },
+        { internalType: 'uint256', name: 'start', type: 'uint256' },
+        { internalType: 'uint256', name: 'isClaimed', type: 'uint256' },
+        { internalType: 'uint256', name: 'isWithdrawn', type: 'uint256' },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: '', type: 'address' }],
+      name: 'investors',
+      outputs: [
+        { internalType: 'address', name: 'user', type: 'address' },
+        { internalType: 'uint256', name: 'totalInvestments', type: 'uint256' },
+        { internalType: 'uint256', name: 'totalStaked', type: 'uint256' },
+        { internalType: 'uint256', name: 'totalRewards', type: 'uint256' },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'owner',
+      outputs: [{ internalType: 'address', name: '', type: 'address' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'pause',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'paused',
+      outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'renounceOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '_maxInvestmentsPerUser',
+          type: 'uint256',
+        },
+      ],
+      name: 'setMaxInvestmentsPerUser',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '_tax', type: 'uint256' }],
+      name: 'setTax',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'startTime',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'tax',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalInvestments',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalInvestors',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalOwnerAddedFunds',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalRewards',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalStaked',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalTaxCollected',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalUnwithdrawnOwnerAddedFunds',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'totalUnwithdrawnTax',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'address', name: 'newOwner', type: 'address' }],
+      name: 'transferOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'tsion',
+      outputs: [{ internalType: 'contract IERC20', name: '', type: 'address' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [],
+      name: 'unpause',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_id', type: 'uint256' },
+        { internalType: 'uint256', name: '_duration', type: 'uint256' },
+        { internalType: 'uint256', name: '_interest', type: 'uint256' },
+        { internalType: 'uint256', name: '_isActive', type: 'uint256' },
+      ],
+      name: 'updateInvestmentPlan',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'address', name: '', type: 'address' },
+        { internalType: 'uint256', name: '', type: 'uint256' },
+      ],
+      name: 'userInvestments',
+      outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_investmentId', type: 'uint256' },
+      ],
+      name: 'withdrawAmount',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '_amount', type: 'uint256' }],
+      name: 'withdrawFunds',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [
+        { internalType: 'uint256', name: '_investmentId', type: 'uint256' },
+      ],
+      name: 'withdrawReward',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+    {
+      inputs: [{ internalType: 'uint256', name: '_amount', type: 'uint256' }],
+      name: 'withdrawTax',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
 };
 
 export const chainMapping = {
@@ -944,7 +1553,7 @@ export const dbCoins = [
       networkType: 'BTC',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://live.blockcypher.com/btc",
+      scanUrl: 'https://live.blockcypher.com/btc',
       id: '64c20a95c122a222c4f6b2cf',
     },
     isDeleted: false,
@@ -956,8 +1565,8 @@ export const dbCoins = [
     id: '64a7c06f8efc0fbbb9959e2f',
     swapAmount: 22988854,
     sortOrder: 99,
-    onRampId: "btc",
-    onRampNetworkId: "BTC",
+    onRampId: 'btc',
+    onRampNetworkId: 'BTC',
     priceFrom: 'COINGECKO',
   },
   {
@@ -986,7 +1595,7 @@ export const dbCoins = [
       isDeleted: false,
       isActive: true,
       rpcUrlAlt: 'https://rpc.ankr.com/eth',
-      scanUrl: "https://etherscan.io",
+      scanUrl: 'https://etherscan.io',
       id: '64db5088c55541f0916b6d5b',
     },
     isDeleted: false,
@@ -998,8 +1607,8 @@ export const dbCoins = [
     id: '64db50d6c55541f0916b6d5e',
     swapAmount: 1860.34,
     sortOrder: 99,
-    onRampId: "eth",
-    onRampNetworkId: "erc2",
+    onRampId: 'eth',
+    onRampNetworkId: 'erc2',
     priceFrom: 'COINGECKO',
   },
   {
@@ -1027,7 +1636,7 @@ export const dbCoins = [
       networkType: 'TRON',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://tronscan.org",
+      scanUrl: 'https://tronscan.org',
       id: '64a55155fb3091c797e79992',
     },
     isDeleted: false,
@@ -1039,8 +1648,8 @@ export const dbCoins = [
     id: '64a7c1f48efc0fbbb4959e23',
     swapAmount: 0.081089,
     sortOrder: 99,
-    onRampId: "trx",
-    onRampNetworkId: "trc2",
+    onRampId: 'trx',
+    onRampNetworkId: 'trc2',
     priceFrom: 'COINGECKO',
   },
   {
@@ -1068,7 +1677,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://bscscan.com",
+      scanUrl: 'https://bscscan.com',
       id: '64a54ccafb3091c797e7998e',
     },
     isDeleted: false,
@@ -1081,8 +1690,8 @@ export const dbCoins = [
     id: '64a54ccafb3091c797e7998e',
     swapAmount: 1860.34,
     sortOrder: 2,
-    onRampId: "bnb",
-    onRampNetworkId: "bep2",
+    onRampId: 'bnb',
+    onRampNetworkId: 'bep2',
     priceFrom: 'COINGECKO',
   },
   {
@@ -1098,7 +1707,7 @@ export const dbCoins = [
     priceFormer: 180.34,
     priceMarket: 1860.34,
     isStakingAvailable: true,
-    stakingContractAddress: "0xd98C452bB1e079142c69A0Ab1551d4Bf2a07fD37",
+    stakingContractAddress: '0xd98C452bB1e079142c69A0Ab1551d4Bf2a07fD37',
     networkId: {
       name: 'Binance Smart Chain',
       symbol: 'BSC',
@@ -1112,7 +1721,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://bscscan.com",
+      scanUrl: 'https://bscscan.com',
       id: '64a54ccafb3091c797e7998e',
     },
     isDeleted: false,
@@ -1125,8 +1734,8 @@ export const dbCoins = [
     id: '64a54ccafb3091c798e7998e',
     swapAmount: 1860.34,
     sortOrder: 2,
-    onRampId: "",
-    onRampNetworkId: "",
+    onRampId: '',
+    onRampNetworkId: '',
     priceFrom: 'COINGECKO_TERMINAL',
   },
   {
@@ -1154,7 +1763,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://polygonscan.com",
+      scanUrl: 'https://polygonscan.com',
       id: '6508234fafef51cbd07d7765',
     },
     isDeleted: false,
@@ -1167,8 +1776,8 @@ export const dbCoins = [
     id: '6508239aafef51cbd07d7768',
     swapAmount: 1860.34,
     sortOrder: 99,
-    onRampId: "matic",
-    onRampNetworkId: "matic2",
+    onRampId: 'matic',
+    onRampNetworkId: 'matic2',
     priceFrom: 'COINGECKO',
   },
   {
@@ -1196,7 +1805,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://snowtrace.io",
+      scanUrl: 'https://snowtrace.io',
       id: '6508253dafef51cbd07d7771',
     },
     isDeleted: false,
@@ -1210,7 +1819,7 @@ export const dbCoins = [
     swapAmount: 1860.34,
     sortOrder: 99,
     onRampId: '',
-    onRampNetworkId: "",
+    onRampNetworkId: '',
     priceFrom: 'COINGECKO',
   },
   {
@@ -1238,7 +1847,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://ftmscan.com",
+      scanUrl: 'https://ftmscan.com',
       id: '650825f9afef51cbd07d7777',
     },
     isDeleted: false,
@@ -1280,7 +1889,7 @@ export const dbCoins = [
       networkType: 'TRON',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://tronscan.org",
+      scanUrl: 'https://tronscan.org',
       id: '64a55155fb3091c797e79992',
     },
     isDeleted: false,
@@ -1320,7 +1929,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://etherscan.io",
+      scanUrl: 'https://etherscan.io',
       rpcUrlAlt: 'https://rpc.ankr.com/eth',
       id: '64db5088c55541f0916b6d5b',
     },
@@ -1361,7 +1970,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://bscscan.com",
+      scanUrl: 'https://bscscan.com',
       id: '64a54ccafb3091c797e7998e',
     },
     isDeleted: false,
@@ -1402,7 +2011,7 @@ export const dbCoins = [
       networkType: 'EVM',
       isDeleted: false,
       isActive: true,
-      scanUrl: "https://bscscan.com",
+      scanUrl: 'https://bscscan.com',
       id: '64a54ccafb3091c797e7998e',
     },
     isDeleted: false,
@@ -1415,47 +2024,46 @@ export const dbCoins = [
     id: '64a54ccafb3091c797e7998f',
     swapAmount: 1860.34,
     onRampId: 'busd',
-    onRampNetworkId: "bep2",
+    onRampNetworkId: 'bep2',
     priceFrom: 'COINGECKO',
   },
 ];
 
 export const depositBank: DepositBankDetail = {
-  _id: "64a54ccafb3091c797e7998f",
-  currency: "usd",
-  accountHolderName: "Tsion",
-  accountNumber: "0000000000",
-  bank: "GTBank",
-  quote: "00",
-}
+  _id: '64a54ccafb3091c797e7998f',
+  currency: 'usd',
+  accountHolderName: 'Tsion',
+  accountNumber: '0000000000',
+  bank: 'GTBank',
+  quote: '00',
+};
 
 export const depositBankNgn: DepositBankDetail = {
-  _id: "64a54ccafb3091c797e7999f",
-  currency: "ngn",
-  accountHolderName: "Tsion",
-  accountNumber: "0000000000",
-  bank: "GTBank",
-  quote: "00",
-}
+  _id: '64a54ccafb3091c797e7999f',
+  currency: 'ngn',
+  accountHolderName: 'Tsion',
+  accountNumber: '0000000000',
+  bank: 'GTBank',
+  quote: '00',
+};
 
 export const getBitcoinFeeData = async (rpc: string) => {
   try {
     const url = rpc;
-    const response = await fetch(url)
+    const response = await fetch(url);
 
     if (response.status !== 200) {
-      console.log(response)
-      throw new Error("Error getting bitcoin fee data")
+      console.log(response);
+      throw new Error('Error getting bitcoin fee data');
     }
 
-    const data = await response.json()
+    const data = await response.json();
 
-    return data
+    return data;
+  } catch (err) {
+    console.log(err);
+    throw new Error(err);
   }
-  catch (err) {
-    console.log(err)
-    throw new Error(err)
-  }
-}
+};
 
 export const BTC_MAX_GAS_FEE = 15000;
