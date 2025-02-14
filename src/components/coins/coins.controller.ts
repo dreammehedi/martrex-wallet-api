@@ -1,17 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CoinsService } from './coins.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { JwtAdminGuard } from '../auth/jwt-admin.guard';
-import { UpdatePriceDTO } from './dto/coin.dto';
 
 @ApiTags('Coins')
 @Controller('coins')

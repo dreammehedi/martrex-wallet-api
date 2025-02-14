@@ -1,21 +1,36 @@
 import { Module } from '@nestjs/common';
-import { CoinsController } from './coins.controller';
-import { CoinsService } from './coins.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Coin, CoinSchema } from 'src/schema/Coin/coin.schema';
-import { Network, NetworkSchema } from 'src/schema/Network/network.schema';
-import { Currency, CurrencySchema } from 'src/schema/Currency/currency.schema';
+import { Coin, CoinSchema } from '../../schema/Coin/coin.schema';
 import {
   CoinPrice,
   CoinPriceSchema,
-} from 'src/schema/CoinPrice/coin-price.schema';
-import { FeeInfo, FeeInfoSchema } from 'src/schema/FeeInfo/fee-info.schema';
-import { StakingPlan, StakingPlanSchema } from 'src/schema/StakingPlan/staking-plan.schema';
-import { StakingInfo, StakingInfoSchema } from 'src/schema/StakingInfo/staking-info.schema';
-import { UserStakeInfo, UserStakeInfoSchema } from 'src/schema/UserStakeInfo/user-stake-info.schema';
-import { User, UserSchema } from 'src/schema/User/user.schema';
-import { StakeInvestmentInfo, StakeInvestmentInfoSchema } from 'src/schema/StakeInvestmentInfo/stake-investment-info.schema';
-import { Wallet, WalletSchema } from 'src/schema/Wallet/wallet.schema';
+} from '../../schema/CoinPrice/coin-price.schema';
+import {
+  Currency,
+  CurrencySchema,
+} from '../../schema/Currency/currency.schema';
+import { FeeInfo, FeeInfoSchema } from '../../schema/FeeInfo/fee-info.schema';
+import { Network, NetworkSchema } from '../../schema/Network/network.schema';
+import {
+  StakeInvestmentInfo,
+  StakeInvestmentInfoSchema,
+} from '../../schema/StakeInvestmentInfo/stake-investment-info.schema';
+import {
+  StakingInfo,
+  StakingInfoSchema,
+} from '../../schema/StakingInfo/staking-info.schema';
+import {
+  StakingPlan,
+  StakingPlanSchema,
+} from '../../schema/StakingPlan/staking-plan.schema';
+import { User, UserSchema } from '../../schema/User/user.schema';
+import {
+  UserStakeInfo,
+  UserStakeInfoSchema,
+} from '../../schema/UserStakeInfo/user-stake-info.schema';
+import { Wallet, WalletSchema } from '../../schema/Wallet/wallet.schema';
+import { CoinsController } from './coins.controller';
+import { CoinsService } from './coins.service';
 
 @Module({
   imports: [
@@ -36,4 +51,4 @@ import { Wallet, WalletSchema } from 'src/schema/Wallet/wallet.schema';
   controllers: [CoinsController],
   providers: [CoinsService],
 })
-export class CoinsModule { }
+export class CoinsModule {}
