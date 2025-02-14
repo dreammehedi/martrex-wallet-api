@@ -1,3 +1,4 @@
+process.env.USE_FAST_SECP256K1 = '0'; // Use pure JS for tiny-secp256k1
 import * as bitcoin from 'bitcoinjs-lib';
 import { ECPairFactory } from 'ecpair';
 import { Types } from 'mongoose';
@@ -25,7 +26,9 @@ export const TRONGRID_API_KEY = '9c4f68b0-2579-4a1b-b08f-220bad91880d';
 
 export const BITCOIN_TOKEN = 'f38f051514e5447dbe6b02d12b11450f';
 
-// const HttpProvider = TronWeb.providers.HttpProvider;
+// const HttpProvider =
+//   TronWeb.providers?.HttpProvider || TronWeb.utils.HttpProvider;
+
 // const fullNode = new HttpProvider(TRON_RPC);
 
 export const tronWeb = new TronWeb({
